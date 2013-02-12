@@ -125,21 +125,7 @@ class ImageSourceKinectDepth : public ImageSource {
 	uint16_t					*mData;
 };
 
-// Used as the deleter for the shared_ptr returned by getImageData() and getDepthData()
-template<typename T>
-class KinectDataDeleter {
-  public:
-	KinectDataDeleter( Kinect::Obj::BufferManager<T> *bufferMgr, shared_ptr<Kinect::Obj> ownerObj )
-		: mBufferMgr( bufferMgr ), mOwnerObj( ownerObj )
-	{}
-	
-	void operator()( T *data ) {
-		mBufferMgr->derefBuffer( data );
-	}
-	
-	shared_ptr<Kinect::Obj>			mOwnerObj; // to prevent deletion of our parent Obj
-	Kinect::Obj::BufferManager<T> *mBufferMgr;
-};
+
 
 Kinect::Kinect( Device device )
 	: mObj( new Obj( device.mIndex, device.mDepthRegister ) )
