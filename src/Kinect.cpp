@@ -125,21 +125,7 @@ class ImageSourceKinectDepth : public ImageSource {
 	uint16_t					*mData;
 };
 
-// Used as the deleter for the shared_ptr returned by getImageData() and getDepthData()
-template<typename T>
-class KinectDataDeleter {
-  public:
-	KinectDataDeleter( Kinect::Obj::BufferManager<T> *bufferMgr, shared_ptr<Kinect::Obj> ownerObj )
-		: mBufferMgr( bufferMgr ), mOwnerObj( ownerObj )
-	{}
-	
-	void operator()( T *data ) {
-		mBufferMgr->derefBuffer( data );
-	}
-	
-	shared_ptr<Kinect::Obj>			mOwnerObj; // to prevent deletion of our parent Obj
-	Kinect::Obj::BufferManager<T> *mBufferMgr;
-};
+
 
 Kinect::Kinect( Device device )
 	: mObj( new Obj( device.mIndex, device.mDepthRegister ) )
@@ -162,9 +148,9 @@ Kinect::Obj::Obj( int deviceIndex, bool depthRegister )
 	freenect_set_video_mode( mDevice, freenect_find_video_mode(FREENECT_RESOLUTION_MEDIUM, FREENECT_VIDEO_RGB) );
 
 	if(depthRegister) {
-		freenect_set_depth_mode( mDevice, freenect_find_depth_mode(FREENECT_RESOLUTION_MEDIUM, FREENECT_DEPTH_11BIT));
-	} else {
 		freenect_set_depth_mode( mDevice, freenect_find_depth_mode(FREENECT_RESOLUTION_MEDIUM, FREENECT_DEPTH_REGISTERED));
+	} else {
+		freenect_set_depth_mode( mDevice, freenect_find_depth_mode(FREENECT_RESOLUTION_MEDIUM, FREENECT_DEPTH_11BIT));
 	}
 
 	mLastVideoFrameInfrared = mVideoInfrared;

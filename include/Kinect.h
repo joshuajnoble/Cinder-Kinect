@@ -63,8 +63,8 @@ class Kinect {
 	//! Represents the identifier for a particular Kinect
 	struct Device {
 		Device( FreenectParams params )
-			: mIndex( params.deviceIndex ),
-              mDepthRegister ( params.depthRegister )
+			: mIndex( params.mDeviceIndex ),
+              mDepthRegister ( params.mDepthRegister )
 		{}
 		
 		int		mIndex;
@@ -179,9 +179,26 @@ class Kinect {
 		float							mTilt;
 	};
 
+    // Used as the deleter for the shared_ptr returned by getImageData() and getDepthData()
+    template<typename T>
+    class KinectDataDeleter {
+    public:
+        KinectDataDeleter( Kinect::Obj::BufferManager<T> *bufferMgr, std::shared_ptr<Kinect::Obj> ownerObj )
+		: mBufferMgr( bufferMgr ), mOwnerObj( ownerObj )
+        {}
+        
+        void operator()( T *data ) {
+            mBufferMgr->derefBuffer( data );
+        }
+        
+        std::shared_ptr<Kinect::Obj> mOwnerObj; // to prevent deletion of our parent Obj
+        Kinect::Obj::BufferManager<T> *mBufferMgr;
+    };
+    
 	friend class ImageSourceKinectColor;
 	friend class ImageSourceKinectDepth;
 	friend class ImageSourceKinectInfrared;
+
 
 	static void			threadedFunc( struct Kinect::Obj *arg );
 	
